@@ -107,8 +107,7 @@ p.lede{font-size:14px;line-height:1.55;color:#3d3d3d;margin:0 0 16px;}
 /* ---------- round 1 ---------- */
 .hud{display:flex;align-items:center;gap:9px;margin:14px 0 12px;}
 .chip{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--ink);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;background:#fff;}
-.chip.timer{background:var(--yellow);}
-.chip.timer.low{background:#F2645A;color:#fff;border-color:#8f2b23;}
+.chip.count{background:var(--yellow);}
 .people{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
 .person{
   border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:var(--sky);
@@ -300,10 +299,9 @@ p.lede{font-size:14px;line-height:1.55;color:#3d3d3d;margin:0 0 16px;}
       <div class="steplabels"><span class="on">Collect clues</span><span>Build the person</span><span>See the result</span></div>
       <div class="scroll"><div class="pad">
         <h1 class="title">Who has met Vera?</h1>
-        <p class="lede">Tap each person to hear what they noticed. Collect as much as you can in 60 seconds.</p>
+        <p class="lede">Tap each person to hear what they noticed. Stop whenever you feel you know enough — you don't have to hear everyone.</p>
         <div class="hud">
-          <span class="chip timer" id="timer">⏱ 1:00</span>
-          <span class="chip" id="counter">0 / 6 clues</span>
+          <span class="chip count" id="counter">0 / 6 clues</span>
         </div>
         <div class="people" id="people"></div>
         <p class="hint" id="r1hint">Tap a person to collect a clue</p>
@@ -575,7 +573,7 @@ const TAKEAWAYS = {
    ================================================================== */
 let collected = new Set();
 let picks = {};
-let timerId = null, left = 60;
+/* no clock in round 1 — the player decides when they have heard enough */
 
 function go(id, dir){
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
@@ -594,32 +592,18 @@ function renderPeople(){
     </div>`).join('');
 }
 function startRound1(){
-  collected = new Set(); picks = {}; left = 60;
-  renderPeople(); updateHud();
+  collected = new Set(); picks = {};
+  renderPeople(); updateCounter();
   document.getElementById('r1next').disabled = true;
   document.getElementById('r1hint').textContent = 'Tap a person to collect a clue';
   go('s-r1');
-  clearInterval(timerId);
-  timerId = setInterval(()=>{
-    left--; updateHud();
-    if(left<=0){ clearInterval(timerId); timeUp(); }
-  },1000);
 }
-function updateHud(){
-  const t = document.getElementById('timer');
-  const m = Math.floor(Math.max(left,0)/60), s = String(Math.max(left,0)%60).padStart(2,'0');
-  t.textContent = `⏱ ${m}:${s}`;
-  t.classList.toggle('low', left<=10);
+function updateCounter(){
   document.getElementById('counter').textContent = `${collected.size} / 6 clues`;
-}
-function timeUp(){
-  document.getElementById('r1hint').textContent = "Time's up — build her with what you have.";
-  document.getElementById('r1next').disabled = false;
-  closeSheet();
 }
 function openClue(id){
   const p = PEOPLE.find(x=>x.id===id);
-  collected.add(id); renderPeople(); updateHud();
+  collected.add(id); renderPeople(); updateCounter();
   document.getElementById('sh-av').innerHTML = S(108,118,`<g transform="translate(0,6)">`+head(p.art)+`</g>`,'#F7F3EC');
   document.getElementById('sh-name').textContent = p.name;
   document.getElementById('sh-role').textContent = p.role;
@@ -627,10 +611,9 @@ function openClue(id){
   document.getElementById('sheet').classList.add('up');
   document.getElementById('scrim').classList.add('on');
   if(collected.size >= 3) document.getElementById('r1next').disabled = false;
-  if(collected.size === 6){
-    clearInterval(timerId);
-    document.getElementById('r1hint').textContent = 'All six collected. Nice ears.';
-  }
+  const hint = document.getElementById('r1hint');
+  if(collected.size === 6)      hint.textContent = 'All six collected. Nice ears.';
+  else if(collected.size >= 3)  hint.textContent = 'Enough to start building — or keep listening.';
 }
 function closeSheet(){
   document.getElementById('sheet').classList.remove('up');
@@ -639,7 +622,6 @@ function closeSheet(){
 
 /* ---------- bridge ---------- */
 function toMid(){
-  clearInterval(timerId);
   document.getElementById('mid-h').textContent = `You collected ${collected.size} clue${collected.size===1?'':'s'}.`;
   go('s-mid');
 }
@@ -663,7 +645,6 @@ function renderQuestions(){
     </div>`).join('');
 }
 function startRound2(){
-  clearInterval(timerId);
   if(collected.size===0){ PEOPLE.slice(0,4).forEach(p=>collected.add(p.id)); }
   picks = {};
   renderQuestions();
