@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Read the Room — Guess the Person</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,900&family=Libre+Franklin:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --ink:#121212; --paper:#ffffff; --cream:#FAF6EF; --rule:#121212;
+  --grey:#6E6E6E; --hair:#DCD7CE;
+  --purple:#B4A7EE; --yellow:#F7DA21; --green:#A5CB8C; --blue:#9BBEE8;
+  --pink:#EFC3D7; --orange:#F2A65A; --sand:#EADFC8; --sky:#CFE3F2;
+  --serif:"Fraunces",Georgia,"Times New Roman",serif;
+  --sans:"Libre Franklin",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{margin:0;height:100%;}
+body{
+  font-family:var(--sans);color:var(--ink);
+  background:#EFEBE3;
+  display:grid;place-items:center;padding:24px 16px;
+  -webkit-font-smoothing:antialiased;
+}
+.stage{display:flex;gap:34px;align-items:flex-start;}
+.sidenote{width:250px;padding-top:14px;display:none;}
+@media(min-width:1080px){.sidenote{display:block;}}
+.sidenote h4{font-family:var(--serif);font-size:19px;font-weight:700;margin:0 0 8px;}
+.sidenote p{font-size:12.5px;line-height:1.62;color:#4a4a4a;margin:0 0 14px;}
+.sidenote .k{font-family:var(--sans);font-weight:700;}
+.jump{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.jump button{font:600 11px var(--sans);background:#fff;border:1.5px solid var(--ink);border-radius:20px;padding:5px 11px;cursor:pointer;}
+.jump button:hover{background:var(--yellow);}
+
+/* ---------- device ---------- */
+.device{
+  width:390px;height:844px;position:relative;flex:none;
+  background:var(--paper);border:2px solid var(--ink);border-radius:38px;
+  box-shadow:14px 16px 0 rgba(18,18,18,.14);overflow:hidden;
+}
+.statusbar{
+  height:44px;display:flex;align-items:flex-end;justify-content:space-between;
+  padding:0 26px 5px;font-size:13px;font-weight:700;letter-spacing:.01em;flex:none;
+  background:inherit;
+}
+.statusbar .icons{display:flex;gap:5px;align-items:center;}
+.screen{
+  position:absolute;inset:0;display:none;flex-direction:column;background:var(--paper);
+}
+.screen.on{display:flex;}
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;}
+.scroll::-webkit-scrollbar{width:0;}
+.pad{padding:0 22px 26px;}
+
+/* ---------- shared bits ---------- */
+.masthead{text-align:center;padding:8px 22px 14px;border-bottom:1.5px solid var(--ink);}
+.masthead .mark{font-family:var(--serif);font-weight:900;font-size:23px;letter-spacing:-.02em;}
+.masthead .sub{font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);margin-top:3px;}
+.tabs{display:flex;gap:20px;padding:11px 22px;border-bottom:1px solid var(--hair);font-size:13px;font-weight:600;color:var(--grey);overflow-x:auto;}
+.tabs span.sel{color:var(--ink);position:relative;}
+.tabs span.sel:after{content:"";position:absolute;left:0;right:0;bottom:-12px;height:3px;background:var(--yellow);}
+.eyebrow{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;border-bottom:1.5px solid var(--ink);padding-bottom:6px;margin:20px 0 14px;}
+h1.title{font-family:var(--serif);font-size:31px;line-height:1.04;font-weight:900;letter-spacing:-.02em;margin:16px 0 8px;}
+h2.q{font-family:var(--serif);font-size:19px;line-height:1.18;font-weight:700;margin:0 0 3px;}
+p.lede{font-size:14px;line-height:1.55;color:#3d3d3d;margin:0 0 16px;}
+.btn{
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;
+  background:var(--ink);color:#fff;border:0;border-radius:40px;padding:16px;
+  font:700 15px var(--sans);cursor:pointer;letter-spacing:.01em;
+}
+.btn:disabled{background:#C9C5BD;color:#fff;cursor:default;}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--ink);}
+.footbar{padding:12px 22px calc(12px + env(safe-area-inset-bottom));border-top:1px solid var(--hair);background:#fff;flex:none;}
+.topbar{display:flex;align-items:center;gap:14px;padding:6px 20px 12px;flex:none;}
+.x{font-size:22px;line-height:1;cursor:pointer;background:none;border:0;padding:0;font-family:var(--sans);}
+.steps{flex:1;display:flex;align-items:center;}
+.step{flex:1;display:flex;align-items:center;}
+.dot{width:11px;height:11px;border-radius:50%;border:2px solid var(--ink);background:#fff;flex:none;}
+.dot.done{background:var(--ink);}
+.dot.now{background:var(--yellow);}
+.bar{height:2px;flex:1;background:var(--hair);}
+.bar.done{background:var(--ink);}
+.steplabels{display:flex;padding:0 20px 10px;font-size:9.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#A5A19A;flex:none;}
+.steplabels span{flex:1;}
+.steplabels span:nth-child(2){text-align:center;}
+.steplabels span:nth-child(3){text-align:right;}
+.steplabels span.on{color:var(--ink);}
+
+/* ---------- hub ---------- */
+.hero{
+  border:2px solid var(--ink);border-radius:6px;overflow:hidden;margin-top:18px;background:var(--purple);
+}
+.hero .art{height:150px;display:grid;place-items:center;}
+.hero .meta{background:#fff;border-top:2px solid var(--ink);padding:16px 18px;}
+.hero h3{font-family:var(--serif);font-size:26px;font-weight:900;margin:0;letter-spacing:-.02em;}
+.hero .by{font-size:12px;color:var(--grey);margin:4px 0 14px;}
+.streak{display:inline-flex;align-items:center;gap:6px;background:var(--yellow);border:1.5px solid var(--ink);border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;margin-bottom:12px;}
+.row{display:flex;gap:12px;border:2px solid var(--ink);border-radius:6px;overflow:hidden;margin-bottom:12px;background:#fff;}
+.row .tile{width:88px;flex:none;display:grid;place-items:center;border-right:2px solid var(--ink);}
+.row .txt{padding:14px 12px 14px 2px;}
+.row h4{font-family:var(--serif);font-size:17px;font-weight:700;margin:0 0 3px;}
+.row p{font-size:11.5px;color:var(--grey);margin:0;}
+.lock{margin-left:auto;align-self:center;padding-right:14px;font-size:14px;color:#B7B2A9;}
+
+/* ---------- round 1 ---------- */
+.hud{display:flex;align-items:center;gap:9px;margin:14px 0 12px;}
+.chip{display:inline-flex;align-items:center;gap:7px;border:1.5px solid var(--ink);border-radius:20px;padding:6px 12px;font-size:12px;font-weight:700;background:#fff;}
+.chip.count{background:var(--yellow);}
+.people{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.person{
+  border:2px solid var(--ink);border-radius:6px;overflow:hidden;background:var(--sky);
+  cursor:pointer;position:relative;transition:transform .12s;
+}
+.person:active{transform:scale(.98);}
+.person .face{height:88px;display:grid;place-items:center;}
+.person .nm{background:#fff;border-top:2px solid var(--ink);padding:7px 9px;}
+.person .nm b{display:block;font-size:12.5px;font-weight:700;}
+.person .nm span{font-size:10.5px;color:var(--grey);}
+.person .got{
+  position:absolute;top:8px;right:8px;width:22px;height:22px;border-radius:50%;
+  background:var(--ink);color:#fff;display:none;place-items:center;font-size:12px;font-weight:800;
+}
+.person.done .got{display:grid;}
+.person.done{opacity:.55;}
+.hint{text-align:center;font-size:12px;color:var(--grey);margin:16px 0 0;}
+
+/* clue sheet */
+.sheet{
+  position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:2px solid var(--ink);
+  border-radius:20px 20px 0 0;padding:22px 22px 26px;transform:translateY(105%);
+  transition:transform .28s cubic-bezier(.2,.8,.2,1);z-index:20;
+}
+.sheet.up{transform:translateY(0);}
+.scrim{position:absolute;inset:0;background:rgba(18,18,18,.35);opacity:0;pointer-events:none;transition:.2s;z-index:15;}
+.scrim.on{opacity:1;pointer-events:auto;}
+.sheet .who{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.sheet .who .av{width:40px;height:40px;border:2px solid var(--ink);border-radius:50%;overflow:hidden;flex:none;background:var(--sand);}
+.sheet .who b{font-size:13.5px;display:block;}
+.sheet .who span{font-size:11px;color:var(--grey);}
+.sheet blockquote{
+  font-family:var(--serif);font-size:21px;line-height:1.32;font-weight:600;margin:0 0 18px;letter-spacing:-.01em;
+}
+.tagline{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:10px;}
+
+/* ---------- round 2 ---------- */
+.qcard{border:2px solid var(--ink);border-radius:6px;padding:15px 15px 16px;margin-bottom:14px;background:#fff;}
+.qhead{display:flex;gap:10px;align-items:flex-start;margin-bottom:12px;}
+.qnum{
+  width:26px;height:26px;flex:none;border:2px solid var(--ink);border-radius:50%;
+  display:grid;place-items:center;font-size:12px;font-weight:800;background:var(--yellow);
+}
+.qhead small{font-size:11px;color:var(--grey);font-weight:600;}
+.opts{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;}
+.opt{
+  border:2px solid var(--ink);border-radius:5px;overflow:hidden;cursor:pointer;background:#fff;
+  position:relative;transition:transform .1s;
+}
+.opt:active{transform:scale(.96);}
+.opt .ic{height:64px;display:grid;place-items:center;}
+.opt .lb{border-top:2px solid var(--ink);padding:6px 5px;font-size:10.5px;font-weight:600;line-height:1.25;text-align:center;min-height:38px;display:grid;place-items:center;}
+.opt.sel{box-shadow:inset 0 0 0 3px var(--ink);}
+.opt.sel .lb{background:var(--ink);color:#fff;}
+.opt .tick{position:absolute;top:5px;right:5px;width:19px;height:19px;border-radius:50%;background:var(--ink);color:#fff;display:none;place-items:center;font-size:11px;font-weight:800;}
+.opt.sel .tick{display:grid;}
+.extra textarea{
+  width:100%;border:2px solid var(--ink);border-radius:5px;padding:11px;font:500 13.5px var(--sans);
+  resize:none;height:70px;
+}
+.extra textarea:focus{outline:none;box-shadow:inset 0 0 0 2px var(--yellow);}
+.chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;}
+.chips button{
+  font:600 11.5px var(--sans);background:#fff;border:1.5px solid var(--ink);border-radius:20px;
+  padding:6px 11px;cursor:pointer;
+}
+.chips button:hover{background:var(--yellow);}
+
+/* ---------- result ---------- */
+.portrait{border:2px solid var(--ink);border-radius:6px;overflow:hidden;margin:16px 0 0;}
+.portrait .cap{border-top:2px solid var(--ink);background:#fff;padding:10px 12px;font-size:11px;color:var(--grey);}
+.reveal{background:var(--cream);border:2px solid var(--ink);border-radius:6px;padding:14px;margin-top:14px;}
+.reveal li{list-style:none;display:flex;gap:9px;align-items:flex-start;padding:7px 0;border-bottom:1px dashed #D6CFC1;font-size:12.5px;line-height:1.4;}
+.reveal li:last-child{border:0;}
+.reveal ul{margin:0;padding:0;}
+.badge{
+  font-size:9px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border:1.5px solid var(--ink);
+  border-radius:3px;padding:2px 5px;flex:none;margin-top:1px;background:var(--green);
+}
+.badge.guess{background:#fff;}
+.badge.own{background:var(--purple);}
+.evi{font-size:11px;color:var(--grey);display:block;margin-top:2px;font-style:italic;}
+.bars{margin-top:8px;}
+.barrow{display:flex;align-items:center;gap:10px;margin-bottom:11px;}
+.barrow .nm{font-size:12px;font-weight:600;width:118px;flex:none;}
+.barrow .track{flex:1;height:11px;border:1.5px solid var(--ink);border-radius:2px;overflow:hidden;background:#fff;}
+.barrow .fill{height:100%;background:var(--purple);width:0;transition:width .8s cubic-bezier(.2,.8,.2,1);}
+.barrow .fill.you{background:var(--yellow);}
+.barrow .pc{font-size:12px;font-weight:800;width:38px;text-align:right;flex:none;}
+.youtag{font-size:9px;font-weight:800;border:1.5px solid var(--ink);border-radius:3px;padding:1px 4px;margin-left:5px;background:var(--yellow);}
+.scores{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+.score{border:2px solid var(--ink);border-radius:6px;padding:13px;}
+.score b{display:block;font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);}
+.score .n{font-family:var(--serif);font-size:38px;font-weight:900;line-height:1.05;margin:3px 0 4px;letter-spacing:-.03em;}
+.score p{font-size:11px;line-height:1.4;color:#4a4a4a;margin:0;}
+.takeaway{border:2px solid var(--ink);border-radius:6px;background:var(--yellow);padding:15px;margin-top:16px;}
+.takeaway b{font-size:10px;font-weight:800;letter-spacing:.11em;text-transform:uppercase;}
+.takeaway p{font-family:var(--serif);font-size:17px;line-height:1.3;font-weight:700;margin:7px 0 0;letter-spacing:-.01em;}
+.grid5{font-family:ui-monospace,Menlo,monospace;font-size:19px;letter-spacing:3px;line-height:1.35;margin:10px 0 0;}
+.sharebox{border:2px solid var(--ink);border-radius:6px;padding:15px;margin-top:14px;text-align:center;}
+.sharebox .t{font-family:var(--serif);font-size:15px;font-weight:700;}
+.next{text-align:center;font-size:12px;color:var(--grey);margin:18px 0 4px;}
+
+/* ---------- transition ---------- */
+.mid{flex:1;display:grid;place-items:center;text-align:center;padding:0 34px;}
+.mid h2{font-family:var(--serif);font-size:30px;font-weight:900;line-height:1.08;letter-spacing:-.02em;margin:0 0 10px;}
+.mid p{font-size:14px;line-height:1.55;color:#3d3d3d;margin:0;}
+.pop{animation:pop .4s cubic-bezier(.2,1.4,.4,1);}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.fade{animation:fade .35s ease;}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="device">
+
+    <!-- ============ 0. HUB ============ -->
+    <section class="screen on" id="s-hub">
+      <div class="statusbar"><span>9:41</span><span class="icons"><svg width="54" height="12" viewBox="0 0 54 12" fill="#121212" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="1" width="3" height="11" rx="1"/><path d="M27 3.4c2.6 0 5 1 6.8 2.6l-1.6 1.7A7.7 7.7 0 0 0 27 5.7a7.7 7.7 0 0 0-5.2 2l-1.6-1.7A9.9 9.9 0 0 1 27 3.4zm0 4.1c1.4 0 2.7.5 3.7 1.4L27 12l-3.7-3.1c1-.9 2.3-1.4 3.7-1.4z"/><rect x="38" y="2" width="14" height="8" rx="2.4" fill="none" stroke="#121212" stroke-width="1.4"/><rect x="39.6" y="3.6" width="9" height="4.8" rx="1.2"/><rect x="53" y="4.6" width="1.4" height="2.8" rx=".7"/></svg></span></div>
+      <div class="masthead">
+        <div class="mark">The Empathy Games</div>
+        <div class="sub">Daily practice · 4 min</div>
+      </div>
+      <div class="tabs"><span class="sel">Today</span><span>Archive</span><span>Stats</span><span>Team</span></div>
+      <div class="scroll"><div class="pad">
+        <div class="eyebrow">Free every day</div>
+        <div class="hero" style="margin-top:0">
+          <div class="art" id="hub-art"></div>
+          <div class="meta">
+            <div class="streak">🔥 Day 12 streak</div>
+            <h3>Read the Room</h3>
+            <div class="by">Guess the person · Before you pitch</div>
+            <button class="btn" onclick="go('s-intro')">Play</button>
+          </div>
+        </div>
+
+        <div class="eyebrow">More practice</div>
+        <div class="row">
+          <div class="tile" style="background:var(--pink)" id="t-obj"></div>
+          <div class="txt"><h4>Objection Radar</h4><p>Hear the real question</p></div>
+          <div class="lock">🔒</div>
+        </div>
+        <div class="row">
+          <div class="tile" style="background:var(--green)" id="t-mir"></div>
+          <div class="txt"><h4>Mirror</h4><p>Say it back in their words</p></div>
+          <div class="lock">🔒</div>
+        </div>
+        <div class="next">New person every morning at 6:00.</div>
+      </div></div>
+    </section>
+
+    <!-- ============ 1. INTRO ============ -->
+    <section class="screen" id="s-intro">
+      <div class="statusbar"><span>9:41</span><span class="icons"><svg width="54" height="12" viewBox="0 0 54 12" fill="#121212" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="1" width="3" height="11" rx="1"/><path d="M27 3.4c2.6 0 5 1 6.8 2.6l-1.6 1.7A7.7 7.7 0 0 0 27 5.7a7.7 7.7 0 0 0-5.2 2l-1.6-1.7A9.9 9.9 0 0 1 27 3.4zm0 4.1c1.4 0 2.7.5 3.7 1.4L27 12l-3.7-3.1c1-.9 2.3-1.4 3.7-1.4z"/><rect x="38" y="2" width="14" height="8" rx="2.4" fill="none" stroke="#121212" stroke-width="1.4"/><rect x="39.6" y="3.6" width="9" height="4.8" rx="1.2"/><rect x="53" y="4.6" width="1.4" height="2.8" rx=".7"/></svg></span></div>
+      <div class="topbar"><button class="x" onclick="go('s-hub')">✕</button>
+        <div style="font-size:11px;font-weight:800;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)">Tuesday, Sep 9</div>
+      </div>
+      <div class="scroll"><div class="pad">
+        <div style="border:2px solid var(--ink);border-radius:6px;overflow:hidden">
+          <div style="background:var(--purple);height:170px;display:grid;place-items:center" id="intro-art"></div>
+          <div style="background:#fff;border-top:2px solid var(--ink);padding:18px">
+            <div class="eyebrow" style="margin:0 0 10px">Today's person</div>
+            <h1 class="title" style="margin:0 0 6px">Vera Lam</h1>
+            <p class="lede" style="margin:0 0 14px">
+              Head of Marketing at Northbeam. <b>You pitch to her on Thursday.</b>
+              You have never met her. Five people in your company have.
+            </p>
+            <div style="border-top:1.5px solid var(--ink);padding-top:13px;font-size:12.5px;line-height:1.6;color:#3d3d3d">
+              <b>How it works.</b> Collect what people noticed about her. Then build the person
+              in your head. There is no right answer — only how much of the evidence you actually used.
+            </div>
+          </div>
+        </div>
+      </div></div>
+      <div class="footbar"><button class="btn" onclick="startRound1()">Start collecting →</button></div>
+    </section>
+
+    <!-- ============ 2. ROUND 1 ============ -->
+    <section class="screen" id="s-r1">
+      <div class="statusbar"><span>9:41</span><span class="icons"><svg width="54" height="12" viewBox="0 0 54 12" fill="#121212" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="1" width="3" height="11" rx="1"/><path d="M27 3.4c2.6 0 5 1 6.8 2.6l-1.6 1.7A7.7 7.7 0 0 0 27 5.7a7.7 7.7 0 0 0-5.2 2l-1.6-1.7A9.9 9.9 0 0 1 27 3.4zm0 4.1c1.4 0 2.7.5 3.7 1.4L27 12l-3.7-3.1c1-.9 2.3-1.4 3.7-1.4z"/><rect x="38" y="2" width="14" height="8" rx="2.4" fill="none" stroke="#121212" stroke-width="1.4"/><rect x="39.6" y="3.6" width="9" height="4.8" rx="1.2"/><rect x="53" y="4.6" width="1.4" height="2.8" rx=".7"/></svg></span></div>
+      <div class="topbar"><button class="x" onclick="go('s-hub')">✕</button>
+        <div class="steps">
+          <div class="step"><span class="dot now"></span><span class="bar"></span></div>
+          <div class="step"><span class="dot"></span><span class="bar"></span></div>
+          <div class="step"><span class="dot"></span></div>
+        </div>
+      </div>
+      <div class="steplabels"><span class="on">Collect clues</span><span>Build the person</span><span>See the result</span></div>
+      <div class="scroll"><div class="pad">
+        <h1 class="title">Who has met Vera?</h1>
+        <p class="lede">Tap each person to hear what they noticed. Stop whenever you feel you know enough — you don't have to hear everyone.</p>
+        <div class="hud">
+          <span class="chip count" id="counter">0 / 6 clues</span>
+        </div>
+        <div class="people" id="people"></div>
+        <p class="hint" id="r1hint">Tap a person to collect a clue</p>
+      </div></div>
+      <div class="footbar"><button class="btn" id="r1next" disabled onclick="startRound2()">Build the person →</button></div>
+      <div class="scrim" id="scrim" onclick="closeSheet()"></div>
+      <div class="sheet" id="sheet">
+        <div class="who"><div class="av" id="sh-av"></div><div><b id="sh-name"></b><span id="sh-role"></span></div></div>
+        <blockquote id="sh-quote"></blockquote>
+        <button class="btn ghost" onclick="closeSheet()">Got it</button>
+      </div>
+    </section>
+
+    <!-- ============ 3. MID ============ -->
+    <section class="screen" id="s-mid">
+      <div class="statusbar"><span>9:41</span><span class="icons"><svg width="54" height="12" viewBox="0 0 54 12" fill="#121212" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="1" width="3" height="11" rx="1"/><path d="M27 3.4c2.6 0 5 1 6.8 2.6l-1.6 1.7A7.7 7.7 0 0 0 27 5.7a7.7 7.7 0 0 0-5.2 2l-1.6-1.7A9.9 9.9 0 0 1 27 3.4zm0 4.1c1.4 0 2.7.5 3.7 1.4L27 12l-3.7-3.1c1-.9 2.3-1.4 3.7-1.4z"/><rect x="38" y="2" width="14" height="8" rx="2.4" fill="none" stroke="#121212" stroke-width="1.4"/><rect x="39.6" y="3.6" width="9" height="4.8" rx="1.2"/><rect x="53" y="4.6" width="1.4" height="2.8" rx=".7"/></svg></span></div>
+      <div class="mid pop">
+        <div>
+          <div id="mid-art" style="margin-bottom:22px"></div>
+          <h2 id="mid-h">You collected 6 clues.</h2>
+          <p id="mid-p">Nobody described her face. Nobody told you what she wants.<br>Now build her anyway.</p>
+        </div>
+      </div>
+      <div class="footbar"><button class="btn" onclick="go('s-r2')">Continue →</button></div>
+    </section>
+
+    <!-- ============ 4. ROUND 2 ============ -->
+    <section class="screen" id="s-r2">
+      <div class="statusbar"><span>9:41</span><span class="icons"><svg width="54" height="12" viewBox="0 0 54 12" fill="#121212" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="1" width="3" height="11" rx="1"/><path d="M27 3.4c2.6 0 5 1 6.8 2.6l-1.6 1.7A7.7 7.7 0 0 0 27 5.7a7.7 7.7 0 0 0-5.2 2l-1.6-1.7A9.9 9.9 0 0 1 27 3.4zm0 4.1c1.4 0 2.7.5 3.7 1.4L27 12l-3.7-3.1c1-.9 2.3-1.4 3.7-1.4z"/><rect x="38" y="2" width="14" height="8" rx="2.4" fill="none" stroke="#121212" stroke-width="1.4"/><rect x="39.6" y="3.6" width="9" height="4.8" rx="1.2"/><rect x="53" y="4.6" width="1.4" height="2.8" rx=".7"/></svg></span></div>
+      <div class="topbar"><button class="x" onclick="go('s-hub')">✕</button>
+        <div class="steps">
+          <div class="step"><span class="dot done"></span><span class="bar done"></span></div>
+          <div class="step"><span class="dot now"></span><span class="bar"></span></div>
+          <div class="step"><span class="dot"></span></div>
+        </div>
+      </div>
+      <div class="steplabels"><span>Collect clues</span><span class="on">Build the person</span><span>See the result</span></div>
+      <div class="scroll"><div class="pad">
+        <h1 class="title">Build Vera</h1>
+        <p class="lede">Use what you collected to imagine who she is. There is no single right answer — go with what feels true.</p>
+        <div id="questions"></div>
+
+        <div class="qcard extra">
+          <div class="qhead">
+            <div class="qnum" style="background:var(--purple)">+</div>
+            <div><h2 class="q">Add one detail nobody mentioned</h2><small>Your own invention</small></div>
+          </div>
+          <textarea id="own" placeholder="Something you imagine about Vera…" maxlength="90"></textarea>
+          <div class="chips">
+            <button onclick="fillOwn('She keeps a running list of questions')">a running list of questions</button>
+            <button onclick="fillOwn('She hates being surprised in front of her team')">hates surprises</button>
+            <button onclick="fillOwn('A photo of a trail race on her desk')">a trail-race photo</button>
+          </div>
+        </div>
+      </div></div>
+      <div class="footbar"><button class="btn" id="r2next" disabled onclick="showResult()">See the result →</button></div>
+    </section>
+
+    <!-- ============ 5. RESULT ============ -->
+    <section class="screen" id="s-res">
+      <div class="statusbar"><span>9:41</span><span class="icons"><svg width="54" height="12" viewBox="0 0 54 12" fill="#121212" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="5" width="3" height="7" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="1" width="3" height="11" rx="1"/><path d="M27 3.4c2.6 0 5 1 6.8 2.6l-1.6 1.7A7.7 7.7 0 0 0 27 5.7a7.7 7.7 0 0 0-5.2 2l-1.6-1.7A9.9 9.9 0 0 1 27 3.4zm0 4.1c1.4 0 2.7.5 3.7 1.4L27 12l-3.7-3.1c1-.9 2.3-1.4 3.7-1.4z"/><rect x="38" y="2" width="14" height="8" rx="2.4" fill="none" stroke="#121212" stroke-width="1.4"/><rect x="39.6" y="3.6" width="9" height="4.8" rx="1.2"/><rect x="53" y="4.6" width="1.4" height="2.8" rx=".7"/></svg></span></div>
+      <div class="topbar"><button class="x" onclick="go('s-hub')">✕</button>
+        <div class="steps">
+          <div class="step"><span class="dot done"></span><span class="bar done"></span></div>
+          <div class="step"><span class="dot done"></span><span class="bar done"></span></div>
+          <div class="step"><span class="dot now"></span></div>
+        </div>
+      </div>
+      <div class="steplabels"><span>Collect clues</span><span>Build the person</span><span class="on">See the result</span></div>
+      <div class="scroll"><div class="pad">
+        <h1 class="title">Here's the Vera you imagined</h1>
+        <p class="lede">Nobody sees the same person. Here's yours — and how much of it came from evidence.</p>
+
+        <div class="portrait">
+          <div id="portrait-art"></div>
+          <div class="cap" id="portrait-cap"></div>
+        </div>
+
+        <div class="reveal"><ul id="reveal-list"></ul></div>
+
+        <div class="eyebrow">How others imagined her</div>
+        <div class="bars" id="bars"></div>
+
+        <div class="scores">
+          <div class="score" style="background:var(--sky)">
+            <b>👁 Observation</b>
+            <div class="n" id="sc-obs">0</div>
+            <p id="sc-obs-p">—</p>
+          </div>
+          <div class="score" style="background:var(--pink)">
+            <b>✦ Imagination</b>
+            <div class="n" id="sc-imn">0</div>
+            <p id="sc-imn-p">—</p>
+          </div>
+        </div>
+
+        <div class="takeaway">
+          <b>Take this into the room</b>
+          <p id="takeaway-p">—</p>
+        </div>
+
+        <div class="sharebox">
+          <div class="t">Read the Room #142</div>
+          <div class="grid5" id="sharegrid"></div>
+          <div style="font-size:11px;color:var(--grey);margin-top:8px" id="sharesub"></div>
+          <button class="btn" style="margin-top:12px" onclick="fakeShare(this)">Share result</button>
+        </div>
+
+        <div class="next">Tomorrow: a new person, new clues.<br>Same six questions.</div>
+        <button class="btn ghost" style="margin-top:14px" onclick="resetGame()">Play again</button>
+      </div></div>
+    </section>
+
+  </div>
+
+  <aside class="sidenote">
+    <h4>Read the Room</h4>
+    <p>Prototype tương tác cho game <span class="k">Guess the Person</span> — vòng lặp 3 round: thu clue → dựng người → so với người khác.</p>
+    <p><span class="k">Bối cảnh:</span> nhân vật cần đoán là <b>khách hàng bạn sắp pitch</b>, clue đến từ đồng nghiệp đã làm việc với cô ấy.</p>
+    <p><span class="k">Điểm thêm so với brief:</span> màn kết chỉ rõ lựa chọn nào có clue chống lưng, lựa chọn nào là suy đoán — và quy ra 1 câu hành động mang vào buổi pitch.</p>
+    <div class="jump">
+      <button onclick="go('s-hub')">Hub</button>
+      <button onclick="go('s-intro')">Intro</button>
+      <button onclick="startRound1()">Round 1</button>
+      <button onclick="go('s-mid')">Bridge</button>
+      <button onclick="startRound2()">Round 2</button>
+      <button onclick="demoResult()">Result</button>
+    </div>
+  </aside>
+</div>
+
+<script>
+/* ==================================================================
+   ART — flat, geometric, thick-line SVG in the NYT games register
+   ================================================================== */
+const S = (w,h,inner,bg='none') =>
+  `<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" preserveAspectRatio="xMidYMid meet"
+        style="display:block" xmlns="http://www.w3.org/2000/svg">
+     <rect width="${w}" height="${h}" fill="${bg}"/>${inner}</svg>`;
+
+const K = 'fill="none" stroke="#121212" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"';
+const Kf = c => `fill="${c}" stroke="#121212" stroke-width="3.4" stroke-linejoin="round"`;
+
+/* clue-giver portraits — same construction, six clearly different people */
+function head(o){
+  const {skin='#F1DCC8', hair='#121212', top='#B4A7EE', style=0, glasses=false} = o;
+  /* [drawn behind the face, drawn on top of the face] */
+  const HAIR = [
+    [ `<path ${Kf(hair)} d="M22 52c0-24 14-38 32-38s32 14 32 38v22H22z"/>`,
+      `<path ${Kf(hair)} d="M28 40c2-16 14-24 26-24s24 8 26 24c-6-8-16-11-26-11s-20 3-26 11z"/>` ],            // 0 bob
+    [ ``,
+      `<circle ${Kf(hair)} cx="38" cy="26" r="12"/><circle ${Kf(hair)} cx="56" cy="20" r="13"/>
+       <circle ${Kf(hair)} cx="72" cy="30" r="11"/><circle ${Kf(hair)} cx="30" cy="40" r="9"/>` ],              // 1 curls
+    [ `<path ${Kf(hair)} d="M78 22c14 4 16 24 8 34-6 8-14 4-12-6"/>`,
+      `<path ${Kf(hair)} d="M28 40c2-18 14-26 26-26s26 8 26 26c-6-10-16-13-26-13s-20 3-26 13z"/>` ],             // 2 ponytail
+    [ ``,
+      `<path ${Kf(hair)} d="M30 38c4-16 34-18 42-2 2 4 2 8 2 8H30s-1-4 0-6z"/>
+       <path ${Kf(hair)} d="M32 56c2 16 10 24 22 24s20-8 22-24c-4 10-12 14-22 14s-18-4-22-14z"/>` ],             // 3 crop + beard
+    [ `<path ${Kf(hair)} d="M18 58c0-28 16-44 36-44s36 16 36 44v24H18z"/>`,
+      `` ],                                                                                                      // 4 headscarf
+    [ `<path ${Kf(hair)} d="M20 56c0-26 14-42 34-42s34 16 34 42v30H20z"/>`,
+      `<path ${Kf(hair)} d="M30 42c4-14 14-20 24-20s20 6 24 20c-8-6-16-8-24-8s-16 2-24 8z"/>` ]                  // 5 long
+  ][style % 6];
+  const specs = glasses
+    ? `<circle ${K} cx="43" cy="48" r="9"/><circle ${K} cx="65" cy="48" r="9"/><path ${K} d="M52 48h4M34 46l-6-2M74 46l6-2"/>`
+    : '';
+  return `
+    ${HAIR[0]}
+    <path ${Kf(top)} d="M20 118c0-22 16-34 34-34s34 12 34 34z"/>
+    <rect ${Kf(skin)} x="47" y="66" width="14" height="24" rx="6"/>
+    <ellipse ${Kf(skin)} cx="54" cy="46" rx="26" ry="30"/>
+    ${HAIR[1]}
+    <circle fill="#121212" cx="44" cy="48" r="2.8"/>
+    <circle fill="#121212" cx="64" cy="48" r="2.8"/>
+    ${specs}
+    <path ${K} d="M48 60c4 3 8 3 12 0"/>`;
+}
+
+/* hub / intro art */
+const artMagnify = `
+  <g transform="translate(6,4)">
+    <circle ${Kf('#fff')} cx="60" cy="52" r="34"/>
+    <path ${K} d="M85 78l22 22"/>
+    <g transform="translate(28,18) scale(.62)">${head({top:'#F7DA21',style:1})}</g>
+    <path ${K} d="M14 18l6 6M110 22l-6 6M12 92l7-6"/>
+  </g>`;
+const artEar = `<g transform="translate(10,6)"><path ${Kf('#fff')} d="M50 12c22 0 34 16 32 34-2 16-14 18-16 30-2 10-8 16-18 16"/><path ${K} d="M46 40c8-8 18 0 12 10"/></g>`;
+const artMirror = `<g><rect ${Kf('#fff')} x="14" y="12" width="46" height="66" rx="6"/><rect ${Kf('#fff')} x="60" y="12" width="46" height="66" rx="6"/><path ${K} d="M60 6v80"/></g>`;
+
+document.getElementById('hub-art').innerHTML   = S(120,104,artMagnify);
+document.getElementById('intro-art').innerHTML = S(120,104,artMagnify);
+document.getElementById('t-obj').innerHTML     = S(120,92,artEar);
+document.getElementById('t-mir').innerHTML     = S(120,92,artMirror);
+document.getElementById('mid-art').innerHTML   = S(140,120,artMagnify);
+
+/* ==================================================================
+   CONTENT
+   ================================================================== */
+const PEOPLE = [
+  { id:'c1', name:'Priya',  role:'Account manager',    color:'var(--sky)',    art:{top:'#9BBEE8',style:0,hair:'#1E1E1E',skin:'#EFD3B8'},
+    quote:'“Vera joins every call five minutes early. By the time we open the deck, she has already read it.”' },
+  { id:'c2', name:'Marcus', role:'Sales lead',          color:'var(--sand)',   art:{top:'#F7F3EC',style:3,hair:'#5B4636',skin:'#E7C09A'},
+    quote:'“She never asks about features. Her first question is always — who else has done this before?”' },
+  { id:'c3', name:'Hana',   role:'Support',             color:'var(--pink)',   art:{top:'#fff',style:2,hair:'#221A14',skin:'#F1DCC8',glasses:true},
+    quote:'“When something breaks she writes one short message. No exclamation marks. Ever.”' },
+  { id:'c4', name:'Tomas',  role:'Solutions engineer',  color:'var(--green)',  art:{top:'#F0EAD8',style:1,hair:'#2E2A26',skin:'#B57B4E'},
+    quote:'“In the last workshop she stopped the room and asked what a word on slide 4 actually meant.”' },
+  { id:'c5', name:'Elena',  role:'Met her at a summit', color:'var(--purple)', art:{top:'#fff',style:5,hair:'#7A4A24',skin:'#F3E0CC'},
+    quote:'“She left the dinner early. Said she had a 6am run booked with someone from her team.”' },
+  { id:'c6', name:'Sam',    role:'Her ex-colleague',    color:'var(--yellow)', art:{top:'#1F1F1F',style:4,hair:'#C94F3D',skin:'#8A5A38'},
+    quote:'“Her team calls her before they call anyone else. She always picks up.”' },
+];
+
+/* option art: small flat icons */
+const ICONS = {
+  office:`<rect ${Kf('#fff')} x="12" y="14" width="52" height="44" rx="4"/><path ${K} d="M38 14v44M12 36h52"/>`,
+  whiteboard:`<rect ${Kf('#fff')} x="10" y="12" width="56" height="36" rx="3"/><path ${K} d="M22 24h20M22 34h30M38 48v12M28 66l10-6 10 6"/>`,
+  lobby:`<rect ${Kf('#fff')} x="16" y="20" width="44" height="34" rx="4"/><path ${K} d="M30 20v-6h16v6M38 20v34"/><path ${K} d="M24 54v8M52 54v8"/>`,
+  deck:`<rect ${Kf('#fff')} x="14" y="10" width="44" height="54" rx="3"/><path ${K} d="M24 24h24M24 34h24M24 44h14"/><path fill="none" stroke="#F2645A" stroke-width="3" stroke-linecap="round" d="M20 30c8-6 26-6 34-2M22 48c6 4 16 4 22 1"/>`,
+  laptop:`<rect ${Kf('#fff')} x="14" y="16" width="46" height="30" rx="3"/><path ${Kf('#EADFC8')} d="M8 52h58l-4 8H12z"/>`,
+  notebook:`<rect ${Kf('#EFC3D7')} x="16" y="12" width="40" height="50" rx="3"/><path ${K} d="M26 12v50"/><path ${K} d="M50 20l8 22"/>`,
+  sharp:`<path ${Kf('#121212')} d="M22 24h30l8 40H14z"/><path ${K} d="M37 24v40" stroke="#fff"/>`,
+  warm:`<path ${Kf('#F2A65A')} d="M20 26h36l6 38H14z"/><path ${K} d="M30 26c4 6 12 6 16 0"/>`,
+  travel:`<path ${Kf('#9BBEE8')} d="M18 28h40l4 36H14z"/><path ${K} d="M26 28v-8h24v8"/>`,
+  proof:`<rect ${Kf('#fff')} x="12" y="16" width="52" height="40" rx="3"/><path ${K} d="M22 46l10-14 8 10 6-8 8 12"/>`,
+  mech:`<circle ${Kf('#fff')} cx="38" cy="38" r="18"/><path ${K} d="M38 12v10M38 54v10M12 38h10M54 38h10M20 20l7 7M56 56l-7-7"/>`,
+  people:`<circle ${Kf('#A5CB8C')} cx="28" cy="30" r="10"/><circle ${Kf('#B4A7EE')} cx="50" cy="30" r="10"/><path ${K} d="M14 62c0-10 6-16 14-16s14 6 14 16M36 62c0-10 6-16 14-16s14 6 14 16"/>`,
+  reread:`<path ${Kf('#fff')} d="M10 18h22c3 0 6 2 6 5v37c0-3-3-5-6-5H10z"/><path ${Kf('#fff')} d="M66 18H44c-3 0-6 2-6 5v37c0-3 3-5 6-5h22z"/><path ${K} d="M38 23v37"/>`,
+  meeting:`<rect ${Kf('#EADFC8')} x="10" y="30" width="56" height="10" rx="3"/><circle ${Kf('#fff')} cx="22" cy="18" r="8"/><circle ${Kf('#fff')} cx="38" cy="18" r="8"/><circle ${Kf('#fff')} cx="54" cy="18" r="8"/><path ${K} d="M20 40v18M56 40v18"/>`,
+  run:`<circle ${Kf('#F2A65A')} cx="44" cy="16" r="8"/><path ${K} d="M40 26l-8 14 10 8-4 16M42 40l14 6M32 40l-14 6"/>`,
+};
+
+const QUESTIONS = [
+  { id:'env', cat:'Environment', q:'Where does Vera feel most in control?', opts:[
+      {id:'office', lb:'Her own quiet office', ic:'office',     ev:null,  pct:29},
+      {id:'board',  lb:'A room with her team', ic:'whiteboard', ev:'c6',  pct:47},
+      {id:'lobby',  lb:'Anywhere, between flights', ic:'lobby', ev:null,  pct:24},
+    ]},
+  { id:'obj', cat:'Objects', q:'What does she bring into the room?', opts:[
+      {id:'deck', lb:'A marked-up printout', ic:'deck',     ev:'c1', pct:58},
+      {id:'lap',  lb:'A closed laptop',      ic:'laptop',   ev:null, pct:19},
+      {id:'note', lb:'One notebook, one pen', ic:'notebook', ev:'c3', pct:23},
+    ]},
+  { id:'app', cat:'Appearance', q:'What does she look like walking in?', opts:[
+      {id:'sharp',  lb:'Sharp and minimal',  ic:'sharp',  ev:'c3', pct:52},
+      {id:'warm',   lb:'Warm and casual',    ic:'warm',   ev:'c6', pct:26},
+      {id:'travel', lb:'Straight off a flight', ic:'travel', ev:null, pct:22},
+    ]},
+  { id:'dec', cat:'Decision style', q:'How does she decide?', opts:[
+      {id:'proof', lb:'Wants proof others did it', ic:'proof', ev:'c2', pct:61},
+      {id:'mech',  lb:'Wants to understand how it works', ic:'mech', ev:'c4', pct:27},
+      {id:'ppl',   lb:'Trusts the person in front of her', ic:'people', ev:'c6', pct:12},
+    ]},
+  { id:'act', cat:'Activity', q:'What is she doing 10 minutes before your pitch?', opts:[
+      {id:'reread', lb:'Rereading your deck', ic:'reread',  ev:'c1', pct:44},
+      {id:'meet',   lb:'Ending another meeting', ic:'meeting', ev:null, pct:38},
+      {id:'run',    lb:'Walking outside alone', ic:'run',   ev:'c5', pct:18},
+    ]},
+];
+
+const TAKEAWAYS = {
+  proof:'Open with the customer who already did it. She asks for proof before she asks how it works.',
+  mech:'Bring one slide that shows the mechanism. She will stop you on any word she can’t define.',
+  ppl:'Bring her team into the room. She decides with the people she is responsible for.',
+};
+
+/* ==================================================================
+   STATE + FLOW
+   ================================================================== */
+let collected = new Set();
+let picks = {};
+/* no clock in round 1 — the player decides when they have heard enough */
+
+function go(id, dir){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  const el = document.getElementById(id);
+  el.classList.add('on');
+  el.querySelectorAll('.scroll').forEach(s=>s.scrollTop=0);
+}
+
+/* ---------- round 1 ---------- */
+function renderPeople(){
+  document.getElementById('people').innerHTML = PEOPLE.map(p=>`
+    <div class="person ${collected.has(p.id)?'done':''}" data-id="${p.id}" onclick="openClue('${p.id}')">
+      <div class="got">✓</div>
+      <div class="face" style="background:${p.color}">${S(108,118,head(p.art))}</div>
+      <div class="nm"><b>${p.name}</b><span>${p.role}</span></div>
+    </div>`).join('');
+}
+function startRound1(){
+  collected = new Set(); picks = {};
+  renderPeople(); updateCounter();
+  document.getElementById('r1next').disabled = true;
+  document.getElementById('r1hint').textContent = 'Tap a person to collect a clue';
+  go('s-r1');
+}
+function updateCounter(){
+  document.getElementById('counter').textContent = `${collected.size} / 6 clues`;
+}
+function openClue(id){
+  const p = PEOPLE.find(x=>x.id===id);
+  collected.add(id); renderPeople(); updateCounter();
+  document.getElementById('sh-av').innerHTML = S(108,118,`<g transform="translate(0,6)">`+head(p.art)+`</g>`,'#F7F3EC');
+  document.getElementById('sh-name').textContent = p.name;
+  document.getElementById('sh-role').textContent = p.role;
+  document.getElementById('sh-quote').textContent = p.quote;
+  document.getElementById('sheet').classList.add('up');
+  document.getElementById('scrim').classList.add('on');
+  if(collected.size >= 3) document.getElementById('r1next').disabled = false;
+  const hint = document.getElementById('r1hint');
+  if(collected.size === 6)      hint.textContent = 'All six collected. Nice ears.';
+  else if(collected.size >= 3)  hint.textContent = 'Enough to start building — or keep listening.';
+}
+function closeSheet(){
+  document.getElementById('sheet').classList.remove('up');
+  document.getElementById('scrim').classList.remove('on');
+}
+
+/* ---------- bridge ---------- */
+function toMid(){
+  document.getElementById('mid-h').textContent = `You collected ${collected.size} clue${collected.size===1?'':'s'}.`;
+  go('s-mid');
+}
+
+/* ---------- round 2 ---------- */
+function renderQuestions(){
+  document.getElementById('questions').innerHTML = QUESTIONS.map((q,i)=>`
+    <div class="qcard">
+      <div class="qhead">
+        <div class="qnum">${i+1}</div>
+        <div><h2 class="q">${q.q}</h2><small>${q.cat} · choose 1</small></div>
+      </div>
+      <div class="opts">
+        ${q.opts.map(o=>`
+          <div class="opt" data-q="${q.id}" data-o="${o.id}" onclick="pick('${q.id}','${o.id}')">
+            <div class="tick">✓</div>
+            <div class="ic" style="background:${['var(--cream)','#F3F1EC','var(--cream)'][0]}">${S(76,76,ICONS[o.ic])}</div>
+            <div class="lb">${o.lb}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+function startRound2(){
+  if(collected.size===0){ PEOPLE.slice(0,4).forEach(p=>collected.add(p.id)); }
+  picks = {};
+  renderQuestions();
+  document.getElementById('own').value = '';
+  document.getElementById('r2next').disabled = true;
+  toMid();
+}
+function pick(qid, oid){
+  picks[qid] = oid;
+  document.querySelectorAll(`.opt[data-q="${qid}"]`).forEach(el=>{
+    el.classList.toggle('sel', el.dataset.o === oid);
+  });
+  document.getElementById('r2next').disabled = Object.keys(picks).length < QUESTIONS.length;
+}
+function fillOwn(t){ document.getElementById('own').value = t; }
+
+/* ==================================================================
+   PORTRAIT — composed from the player's picks
+   ================================================================== */
+function portrait(p){
+  const bg = {office:'#EAF0F6', board:'#EDF3E7', lobby:'#F6EEE4'}[p.env] || '#EAF0F6';
+  const scene = {
+    office:`<rect ${Kf('#fff')} x="196" y="34" width="92" height="86" rx="4"/><path ${K} d="M242 34v86M196 77h92"/>
+            <path ${Kf('#A5CB8C')} d="M40 176c-14 0-22-12-16-24 5-10 21-12 27-2 8-10 24-6 26 6 2 12-7 20-19 20z"/>`,
+    board:`<rect ${Kf('#fff')} x="182" y="28" width="112" height="74" rx="3"/>
+           <path ${K} d="M196 48h44M196 62h62M196 76h32"/><path ${Kf('#F2A65A')} d="M262 66l18 8-18 8z"/>`,
+    lobby:`<path ${Kf('#fff')} d="M188 118V44l52-26 52 26v74z"/><rect ${Kf('#9BBEE8')} x="222" y="70" width="36" height="48"/>`
+  }[p.env] || '';
+  const outfit = {sharp:'#121212', warm:'#F2A65A', travel:'#9BBEE8'}[p.app] || '#121212';
+  const object = {
+    deck:`<g transform="translate(150,168) rotate(-8)"><rect ${Kf('#fff')} x="0" y="0" width="54" height="66" rx="3"/>
+          <path ${K} d="M12 16h30M12 30h30M12 44h18"/><path stroke="#F2645A" stroke-width="3.4" fill="none" d="M8 24l38-4"/></g>`,
+    lap:`<g transform="translate(146,182)"><rect ${Kf('#fff')} x="0" y="0" width="62" height="40" rx="3"/>
+         <path ${Kf('#EADFC8')} d="M-6 44h74l-5 10H-1z"/></g>`,
+    note:`<g transform="translate(154,176) rotate(-6)"><rect ${Kf('#EFC3D7')} x="0" y="0" width="46" height="58" rx="3"/>
+          <path ${K} d="M12 0v58"/><path ${K} d="M34 10l10 30"/></g>`
+  }[p.obj] || '';
+  const activity = {
+    reread:`<path ${K} d="M118 128c8 6 20 6 28 0"/>`,
+    meet:`<g transform="translate(40,96)"><circle ${Kf('#fff')} cx="0" cy="0" r="14"/><path ${K} d="M-6 -2h12M-6 4h8"/></g>`,
+    run:`<g transform="translate(250,150)"><path ${Kf('#F7DA21')} d="M0 0h34l8 22H-4z"/><path ${K} d="M8 0v-10h18v10"/></g>`
+  }[p.act] || '';
+  const decor = p.dec==='proof'
+    ? `<g transform="translate(196,140)"><rect ${Kf('#fff')} x="0" y="0" width="92" height="58" rx="3"/><path ${K} d="M12 44l20-22 14 14 12-16 22 24"/></g>`
+    : p.dec==='mech'
+    ? `<g transform="translate(226,146)"><circle ${Kf('#fff')} cx="30" cy="30" r="22"/><path ${K} d="M30 0v12M30 48v12M0 30h12M48 30h12M9 9l9 9M51 51l-9-9"/></g>`
+    : `<g transform="translate(212,150)"><circle ${Kf('#A5CB8C')} cx="24" cy="22" r="15"/><circle ${Kf('#B4A7EE')} cx="56" cy="22" r="15"/>
+       <path ${K} d="M2 62c0-14 10-22 22-22s22 8 22 22M34 62c0-14 10-22 22-22s22 8 22 22"/></g>`;
+
+  const figure = `
+    <g transform="translate(56,52) scale(1.42)">
+      <path ${Kf(outfit)} d="M8 124c0-26 18-40 38-40s38 14 38 40z"/>
+      <rect ${Kf('#F1DCC8')} x="38" y="60" width="16" height="28" rx="7"/>
+      <ellipse ${Kf('#F1DCC8')} cx="46" cy="38" rx="26" ry="30"/>
+      <path ${Kf('#2B2118')} d="M20 40c-2-22 12-32 26-32s28 10 26 32c-3-12-12-16-26-16s-23 4-26 16z"/>
+      <circle fill="#121212" cx="36" cy="40" r="2.9"/><circle fill="#121212" cx="56" cy="40" r="2.9"/>
+      <path ${K} d="M40 52c4 3 8 3 12 0"/>
+    </g>`;
+
+  return S(340,230, `${scene}${decor}${activity}${figure}${object}`, bg);
+}
+
+/* ==================================================================
+   RESULT
+   ================================================================== */
+function labelOf(qid, oid){
+  const q = QUESTIONS.find(x=>x.id===qid); const o = q.opts.find(x=>x.id===oid); return {q,o};
+}
+function showResult(){
+  const own = document.getElementById('own').value.trim();
+  document.getElementById('portrait-art').innerHTML = portrait(picks);
+  document.getElementById('portrait-cap').textContent =
+    'Your Vera — assembled from ' + collected.size + ' clues and ' + (own?'one':'no') + ' invented detail.';
+
+  /* reveal list with evidence */
+  let backed = 0;
+  const rows = QUESTIONS.map(q=>{
+    const o = q.opts.find(x=>x.id===picks[q.id]);
+    const heard = o.ev && collected.has(o.ev);
+    if(heard) backed++;
+    const src = heard ? PEOPLE.find(p=>p.id===o.ev) : null;
+    return `<li>
+      <span class="badge ${heard?'':'guess'}">${heard?'Evidence':'Your guess'}</span>
+      <div><b>${o.lb}</b>
+        ${heard?`<span class="evi">${src.name} said it — ${src.quote.replace(/[“”]/g,'').slice(0,58)}…</span>`
+               :`<span class="evi">Nobody mentioned this. You filled the gap.</span>`}
+      </div></li>`;
+  });
+  if(own) rows.push(`<li><span class="badge own">Yours</span><div><b>${own}</b>
+    <span class="evi">Pure imagination — the part you'll want to check on Thursday.</span></div></li>`);
+  document.getElementById('reveal-list').innerHTML = rows.join('');
+
+  /* distribution bars — the player's picks first */
+  const all = [];
+  QUESTIONS.forEach(q=>q.opts.forEach(o=>all.push({...o, qid:q.id, you:picks[q.id]===o.id})));
+  all.sort((a,b)=>b.pct-a.pct);
+  const top = all.filter(o=>o.you).concat(all.filter(o=>!o.you)).slice(0,6);
+  document.getElementById('bars').innerHTML = top.map(o=>`
+    <div class="barrow">
+      <div class="nm">${o.lb}${o.you?'<span class="youtag">YOU</span>':''}</div>
+      <div class="track"><div class="fill ${o.you?'you':''}" data-w="${o.pct}"></div></div>
+      <div class="pc">${o.pct}%</div>
+    </div>`).join('');
+  setTimeout(()=>document.querySelectorAll('.fill').forEach(f=>f.style.width=f.dataset.w+'%'),80);
+
+  /* scores */
+  const obs = Math.round((collected.size/6)*55 + (backed/5)*45);
+  const uniq = QUESTIONS.filter(q=>{const o=q.opts.find(x=>x.id===picks[q.id]); return o.pct<=30;}).length;
+  const imn = Math.min(99, 40 + uniq*14 + (own? 22:0));
+  animateNum('sc-obs', obs); animateNum('sc-imn', imn);
+  document.getElementById('sc-obs-p').textContent =
+    `You used ${backed} of 5 answers straight from what people told you.`;
+  document.getElementById('sc-imn-p').textContent =
+    `${uniq?uniq+' unexpected choice'+(uniq===1?'':'s'):'No unexpected choices'}${own?', plus a detail of your own':''}.`;
+
+  document.getElementById('takeaway-p').textContent = TAKEAWAYS[picks.dec];
+
+  /* share grid, Wordle-style */
+  const grid = QUESTIONS.map(q=>{
+    const o = q.opts.find(x=>x.id===picks[q.id]);
+    return (o.ev && collected.has(o.ev)) ? '🟨' : '⬜';
+  }).join('') + (own?'🟪':'');
+  document.getElementById('sharegrid').textContent = grid;
+  document.getElementById('sharesub').textContent =
+    `Observation ${obs} · Imagination ${imn} · ${collected.size}/6 clues`;
+
+  go('s-res');
+}
+function animateNum(id, target){
+  const el = document.getElementById(id); let n = 0;
+  const step = Math.max(1, Math.round(target/24));
+  const t = setInterval(()=>{ n+=step; if(n>=target){n=target;clearInterval(t);} el.textContent=n; }, 26);
+}
+function fakeShare(b){ b.textContent='Copied ✓'; setTimeout(()=>b.textContent='Share result',1600); }
+function resetGame(){ collected=new Set(); picks={}; go('s-hub'); }
+
+/* demo shortcut for the sidebar */
+function demoResult(){
+  collected = new Set(['c1','c2','c3','c5','c6']);
+  picks = {env:'board', obj:'deck', app:'sharp', dec:'proof', act:'reread'};
+  renderQuestions(); Object.entries(picks).forEach(([q,o])=>pick(q,o));
+  document.getElementById('own').value = 'She keeps a running list of questions';
+  showResult();
+}
+renderPeople(); renderQuestions();
+</script>
+</body>
+</html>
