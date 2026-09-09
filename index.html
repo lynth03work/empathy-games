@@ -185,6 +185,26 @@ p.lede{font-size:13.5px;line-height:1.5;color:#3d3d3d;margin:0 0 15px;}
 .lesson b{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;}
 .lesson p{font-family:var(--serif);font-size:16px;line-height:1.3;font-weight:700;margin:6px 0 0;}
 
+.bubble{position:absolute;top:20px;left:12px;width:176px;background:#fff;border:2px solid var(--ink);
+  border-radius:8px;padding:10px 11px;font-size:11.5px;font-weight:600;line-height:1.35;
+  box-shadow:3px 3px 0 rgba(18,18,18,.16);}
+.bubble:after{content:"";position:absolute;right:-9px;top:34px;width:14px;height:14px;background:#fff;
+  border-right:2px solid var(--ink);border-bottom:2px solid var(--ink);transform:rotate(-45deg);}
+.note{display:flex;gap:8px;align-items:flex-start;border:2px solid var(--ink);border-radius:6px;
+  background:var(--sky);padding:9px 11px;margin-top:12px;font-size:11.5px;line-height:1.4;font-weight:500;}
+.note b{flex:none;}
+.chip.timer{background:var(--yellow);}
+.chip.timer.low{background:#F2645A;color:#fff;border-color:#8f2b23;}
+.chip.timer.out{background:var(--ink);color:#fff;}
+.opt.locked{background:#F2EFE9;color:#8B857C;cursor:default;}
+.opt.locked .rd{border-color:#B7B2A9;}
+.opt .lockwhy{display:block;font-weight:500;font-size:11px;margin-top:5px;color:#8B857C;}
+.vs{display:flex;gap:9px;align-items:stretch;margin:14px 0 4px;}
+.vs .col{flex:1;border:2px solid var(--ink);border-radius:6px;padding:11px;background:#fff;}
+.vs .col.after{background:var(--yellow);}
+.vs .col b{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;display:block;margin-bottom:6px;}
+.vs .col p{font-size:12px;line-height:1.4;margin:0;font-weight:600;}
+.vs .arrow{align-self:center;font-size:15px;font-weight:800;}
 /* ---------- overlays ---------- */
 .scrim{position:absolute;inset:0;background:rgba(18,18,18,.55);opacity:0;pointer-events:none;
   transition:.2s;z-index:15;}
@@ -467,6 +487,138 @@ p.lede{font-size:13.5px;line-height:1.5;color:#3d3d3d;margin:0 0 15px;}
     <div class="footbar"><button class="btn" id="pt-btn" onclick="afterPoint()">Continue</button></div>
   </section>
 
+  <!-- ============================ G2 INSTRUCTION ============================ -->
+  <section class="screen" id="g2-intro">
+    <div class="statusbar"><span>9:41</span><span></span></div>
+    <div class="topbar"><button class="x" onclick="go('s-practice')">✕</button>
+      <div class="mini" style="font-weight:700;letter-spacing:.1em;text-transform:uppercase">Game 2 of 3</div></div>
+    <div class="scroll"><div class="pad">
+      <div class="card" style="margin-bottom:16px">
+        <div style="background:var(--pink);height:128px;display:grid;place-items:center" id="g2-art"></div>
+        <div class="body">
+          <h1 class="title" style="margin:0 0 6px">Same Situation</h1>
+          <p class="lede" style="margin:0">Read a client from what you can see. Then sit in her chair and see what you couldn't.</p>
+        </div>
+      </div>
+      <div class="eyebrow">Three rounds</div>
+      <div id="g2-rounds"></div>
+      <div class="card" style="background:var(--cream)"><div class="body">
+        <b style="font-size:12.5px">No score in this game.</b>
+        <p class="mini" style="margin:5px 0 0">Nothing you pick is marked right or wrong. The round is for noticing, not for winning.</p>
+      </div></div>
+    </div></div>
+    <div class="footbar"><button class="btn" onclick="startG2()">Start game</button></div>
+  </section>
+
+  <!-- ============================ G2 ROUND 1 ============================ -->
+  <section class="screen" id="g2-r1">
+    <div class="statusbar"><span>9:41</span><span></span></div>
+    <div class="topbar"><button class="x" onclick="quitGame()">✕</button>
+      <div class="steps"><div class="step"><span class="dot now"></span><span class="bar"></span></div>
+        <div class="step"><span class="dot"></span><span class="bar"></span></div><div class="step"><span class="dot"></span></div></div></div>
+    <div class="steplabels"><span class="on">Round 1 · You</span><span>Round 2 · Her</span><span>Wrap-up</span></div>
+    <div class="scroll"><div class="pad">
+      <h1 class="title" style="margin-top:6px">Difficult, or careful?</h1>
+      <p class="lede">You are presenting a partnership proposal. In the Q&amp;A, Diễm — the decision maker on their side — cuts in:</p>
+      <div class="scene" style="position:relative">
+        <div id="g2-scene"></div>
+        <div class="bubble">Where did this quarter&rsquo;s growth number come from? Has it been verified?</div>
+      </div>
+      <div class="note"><b>ⓘ</b> The data you would need is still sitting with another team.</div>
+      <div class="chip timer" id="g2-t1" style="margin:12px 0 14px">15s</div>
+      <h2 class="sub" style="margin-bottom:10px">How do you respond?</h2>
+      <div id="g2-r1-opts"></div>
+      <div id="g2-r1-late"></div>
+    </div></div>
+    <div class="footbar"><button class="btn" id="g2-r1-next" disabled onclick="go('g2-read')">Continue</button></div>
+  </section>
+
+  <!-- ============================ G2 READ ============================ -->
+  <section class="screen" id="g2-read">
+    <div class="statusbar"><span>9:41</span><span></span></div>
+    <div class="topbar"><button class="x" onclick="quitGame()">✕</button>
+      <div class="steps"><div class="step"><span class="dot now"></span><span class="bar"></span></div>
+        <div class="step"><span class="dot"></span><span class="bar"></span></div><div class="step"><span class="dot"></span></div></div></div>
+    <div class="steplabels"><span class="on">Round 1 · You</span><span>Round 2 · Her</span><span>Wrap-up</span></div>
+    <div class="scroll"><div class="pad">
+      <h1 class="title" style="margin-top:6px">How do you read Diễm?</h1>
+      <p class="lede">Based on what you just saw.</p>
+      <div id="g2-read-opts"></div>
+    </div></div>
+    <div class="footbar"><button class="btn" id="g2-read-next" disabled onclick="toBeat()">Confirm</button></div>
+  </section>
+
+  <!-- ============================ G2 BEAT ============================ -->
+  <section class="screen" id="g2-beat">
+    <div class="statusbar"><span>9:41</span><span></span></div>
+    <div class="center"><div>
+      <p class="lede" style="font-family:var(--serif);font-size:21px;line-height:1.35;font-weight:600;color:var(--ink)"
+         id="beat-text">The meeting ends. Diễm nods, says nothing more, and leaves the room.</p>
+    </div></div>
+    <div class="footbar"><button class="btn ghost" id="beat-btn" onclick="go('g2-r2')" style="opacity:0;transition:opacity .5s">Continue</button></div>
+  </section>
+
+  <!-- ============================ G2 ROUND 2 ============================ -->
+  <section class="screen" id="g2-r2">
+    <div class="statusbar"><span>9:41</span><span></span></div>
+    <div class="topbar"><button class="x" onclick="quitGame()">✕</button>
+      <div class="steps"><div class="step"><span class="dot done"></span><span class="bar done"></span></div>
+        <div class="step"><span class="dot now"></span><span class="bar"></span></div><div class="step"><span class="dot"></span></div></div></div>
+    <div class="steplabels"><span>Round 1 · You</span><span class="on">Round 2 · Her</span><span>Wrap-up</span></div>
+    <div class="scroll"><div class="pad">
+      <h1 class="title" style="margin-top:6px">Now you are Diễm</h1>
+      <div class="card" style="background:var(--cream)"><div class="body">
+        <p class="lede" style="margin:0">Last week your boss brought up last quarter again: the vendor&rsquo;s numbers were wrong, the project overran, the whole team took the blame.
+        <b>&ldquo;Ask properly this time. Don&rsquo;t let it repeat.&rdquo;</b></p>
+      </div></div>
+      <p class="lede">Today, sitting through the presentation, you need that growth number pinned down before you approve anything. So you asked.</p>
+      <div class="eyebrow">They said</div>
+      <div class="quote" style="margin-top:0"><p id="g2-said"></p></div>
+      <div class="chip timer" id="g2-t2" style="margin:14px 0 14px">15s</div>
+      <h2 class="sub" style="margin-bottom:10px">What do you do now?</h2>
+      <div id="g2-r2-opts"></div>
+    </div></div>
+    <div class="footbar"><button class="btn" id="g2-r2-next" disabled onclick="go('g2-outcome')">Continue</button></div>
+    <div class="scrim" id="trap-scrim" onclick="closeTrap()"></div>
+    <div class="sheet" id="trap-sheet">
+      <div class="mini" style="font-weight:800;letter-spacing:.1em;text-transform:uppercase">Hold on</div>
+      <p class="lede" style="margin:10px 0 16px" id="trap-text"></p>
+      <button class="btn" onclick="closeTrap()">Choose again</button>
+    </div>
+  </section>
+
+  <!-- ============================ G2 OUTCOME ============================ -->
+  <section class="screen" id="g2-outcome">
+    <div class="statusbar"><span>9:41</span><span></span></div>
+    <div class="topbar"><button class="x" onclick="quitGame()">✕</button>
+      <div class="steps"><div class="step"><span class="dot done"></span><span class="bar done"></span></div>
+        <div class="step"><span class="dot now"></span><span class="bar"></span></div><div class="step"><span class="dot"></span></div></div></div>
+    <div class="steplabels"><span>Round 1 · You</span><span class="on">Round 2 · Her</span><span>Wrap-up</span></div>
+    <div class="scroll"><div class="pad">
+      <div class="eyebrow" style="margin-top:14px">What happens next</div>
+      <div class="quote obs" style="margin-top:0"><p id="g2-outcome-text"></p></div>
+    </div></div>
+    <div class="footbar"><button class="btn" onclick="go('g2-reflect')">Continue</button></div>
+  </section>
+
+  <!-- ============================ G2 REFLECT ============================ -->
+  <section class="screen" id="g2-reflect">
+    <div class="statusbar"><span>9:41</span><span></span></div>
+    <div class="topbar"><button class="x" onclick="quitGame()">✕</button>
+      <div class="steps"><div class="step"><span class="dot done"></span><span class="bar done"></span></div>
+        <div class="step"><span class="dot done"></span><span class="bar done"></span></div><div class="step"><span class="dot now"></span></div></div></div>
+    <div class="steplabels"><span>Round 1 · You</span><span>Round 2 · Her</span><span class="on">Wrap-up</span></div>
+    <div class="scroll"><div class="pad">
+      <h1 class="title" style="margin-top:6px">Do you see it differently now?</h1>
+      <div class="vs" id="g2-vs"></div>
+      <div class="eyebrow">Now that you know this</div>
+      <p class="lede" style="margin-top:-4px">Do you want to revise your first read of Diễm?</p>
+      <div id="g2-revise-opts"></div>
+      <div id="g2-changed"></div>
+    </div></div>
+    <div class="footbar"><button class="btn" id="g2-end" disabled onclick="endG2()">End round</button></div>
+  </section>
+
   <!-- ============================ STUB GAME ============================ -->
   <section class="screen" id="s-stub">
     <div class="statusbar"><span>9:41</span><span id="sb18"></span></div>
@@ -531,9 +683,12 @@ p.lede{font-size:13.5px;line-height:1.5;color:#3d3d3d;margin:0 0 15px;}
 
 <aside class="sidenote">
   <h4>Orran</h4>
-  <p><span class="k">Prototype app</span> — onboarding + survey, Home 4 tab, Daily Practice loop, và <b>Game 1 “Who Holds the Decision?”</b> chơi được đủ 3 round + chấm điểm 100.</p>
-  <p>Game 2 và Game 3 để <span class="k">stub</span> trong flow (bấm “Simulate finish” để xem hết vòng lặp ngày → Summary → Congrats → Unlock).</p>
-  <p><span class="k">Game 3</span> “Guess the Person” nằm ở file riêng <b>read-the-room.html</b>, chưa gắn vào hub.</p>
+  <p><span class="k">Prototype app</span> — onboarding + survey, Home 4 tab, Daily Practice loop.</p>
+  <p><b>Game 1 “Who Holds the Decision?”</b> — 3 round, chấm 100 điểm.<br>
+     <b>Game 2 “Same Situation”</b> — 3 round, <span class="k">cố ý không chấm điểm</span> theo đúng
+     chủ đích trong Figma: không đúng/sai, không kết luận đạo đức.</p>
+  <p><span class="k">Game 3</span> “Guess the Person” nằm ở file riêng <b>read-the-room.html</b>,
+     chưa gắn vào hub — trong flow vẫn là stub.</p>
   <div class="jump" id="jump"></div>
 </aside>
 </div>
@@ -586,6 +741,8 @@ const artEye   = `<g><path ${Kf('#fff')} d="M6 40c14-20 46-32 76 0-30 32-62 20-7
 const artTable = `<g><rect ${Kf('#fff')} x="10" y="42" width="76" height="12" rx="4"/>
   <circle ${Kf('#9BBEE8')} cx="24" cy="26" r="11"/><circle ${Kf('#EFC3D7')} cx="48" cy="22" r="11"/><circle ${Kf('#A5CB8C')} cx="72" cy="26" r="11"/>
   <path ${K} d="M22 54v12M48 54v12M74 54v12"/></g>`;
+const artSwap  = `<g><circle ${Kf('#fff')} cx="26" cy="30" r="18"/><circle ${Kf('#B4A7EE')} cx="66" cy="50" r="18"/>
+  <path ${K} d="M48 22h18l-6-6M44 58H26l6 6"/></g>`;
 const artStar  = `<g><path ${Kf('#F7DA21')} d="M46 6l11 24 26 3-19 18 5 26-23-13-23 13 5-26L9 33l26-3z"/></g>`;
 const artBook  = `<g><path ${Kf('#fff')} d="M8 16h32c4 0 6 3 6 6v42c0-3-2-6-6-6H8z"/><path ${Kf('#fff')} d="M84 16H52c-4 0-6 3-6 6v42c0-3 2-6 6-6h32z"/><path ${K} d="M46 22v42"/></g>`;
 const artLock  = `<g><rect ${Kf('#fff')} x="18" y="34" width="52" height="38" rx="5"/><path ${K} d="M30 34V24a14 14 0 0 1 28 0v10"/><circle fill="#121212" cx="44" cy="52" r="5"/></g>`;
@@ -701,6 +858,7 @@ const ST = {
    SHELL
    ================================================================== */
 function go(id){
+  clearInterval(ST.timerId);
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   const el = document.getElementById(id);
   el.classList.add('on');
@@ -710,6 +868,10 @@ function go(id){
   if(id==='g1-quest')  renderQuest();
   if(id==='g1-twist')  renderTwist();
   if(id==='s-practice')renderPractice();
+  if(id==='g2-read')   renderG2Read();
+  if(id==='g2-r2'){    renderG2R2(); startTimer('g2-t2', 15, g2TimeUpR2); }
+  if(id==='g2-outcome')renderG2Outcome();
+  if(id==='g2-reflect')renderG2Reflect();
   if(id==='s-summary') renderSummary();
   if(id==='s-congrats')document.getElementById('cg-p').textContent =
     `You earned ${ST.gamePts.reduce((a,b)=>a+b,0)} points and kept a ${ST.streak}-day streak.`;
@@ -789,15 +951,15 @@ function renderHome(){
 function renderLibrary(){
   const games = [
     {sk:'Perspective Taking', n:'Who Holds the Decision?', d:'Find the real decision maker', c:'var(--blue)', a:artCrown, st:'play'},
-    {sk:'Active Listening',   n:'Same Situation',          d:'One event, four versions',      c:'var(--pink)', a:artEye,  st:'soon'},
+    {sk:'Perspective Taking', n:'Same Situation',          d:'Same meeting, her chair',       c:'var(--pink)', a:artSwap, st:'play2'},
     {sk:'Observation · Imagination', n:'Guess the Person',  d:'Build a person from clues',     c:'var(--sand)', a:artStar, st:'soon'},
   ];
   document.getElementById('lib-body').innerHTML = games.map(g=>`
     <div class="eyebrow">${g.sk}</div>
-    <div class="row ${g.st==='soon'?'lockrow':''}" ${g.st==='play'?`onclick="go('g1-intro')"`:''} style="cursor:${g.st==='play'?'pointer':'default'}">
+    <div class="row ${g.st==='soon'?'lockrow':''}" ${g.st==='play'?`onclick="go('g1-intro')"`:g.st==='play2'?`onclick="go('g2-intro')"`:''} style="cursor:${g.st==='soon'?'default':'pointer'}">
       <div class="tile" style="background:${g.c}">${S(92,80,g.a)}</div>
       <div class="txt"><h4>${g.n}</h4><p>${g.d}</p></div>
-      <div class="end">${g.st==='play'?'PLAY':'SOON'}</div>
+      <div class="end">${g.st==='soon'?'SOON':'PLAY'}</div>
     </div>`).join('');
 }
 function renderDiscover(){
@@ -858,7 +1020,7 @@ function renderProfile(){
    ================================================================== */
 const GAMES = [
   {n:'Who Holds the Decision?', d:'Perspective Taking', c:'var(--blue)', a:artCrown},
-  {n:'Same Situation',          d:'Active Listening',   c:'var(--pink)', a:artEye},
+  {n:'Same Situation',          d:'Perspective Taking', c:'var(--pink)', a:artSwap},
   {n:'Guess the Person',        d:'Observation · Imagination', c:'var(--sand)', a:artStar},
 ];
 function renderPractice(){
@@ -874,6 +1036,7 @@ function renderPractice(){
 }
 function openGame(i){
   if(i===0) return go('g1-intro');
+  if(i===1) return go('g2-intro');
   document.getElementById('stub-art').innerHTML = S(120,100,i===1?artEye:artStar);
   document.getElementById('stub-h').textContent = GAMES[i].n;
   document.getElementById('stub-p').innerHTML = i===1
@@ -1224,11 +1387,196 @@ function renderSummary(){
 }
 
 /* ==================================================================
+   GAME 2 — SAME SITUATION
+   Design intent (from the Figma flow): no scoring, no right/wrong,
+   no moral conclusion. Round 1 choice is reused verbatim in Round 2.
+   ================================================================== */
+const DIEM = {name:'Diễm', role:'Decision maker, partner side',
+  art:{top:'#EFC3D7', style:5, hair:'#241A12', skin:'#F1DCC8'}};
+
+const G2_R1 = [
+  {id:'check', t:'“Let me check and send it over after — I don’t have the verified number with me.”'},
+  {id:'bluff', t:'“It’s pulled together from a few sources, you can rely on it.”'},
+  {id:'freeze',t:'(You freeze for a few seconds, with nothing to say.)'},
+];
+const G2_READ = [
+  {id:'hard',  t:'Difficult. She likes putting presenters on the spot.', short:'difficult'},
+  {id:'exact', t:'Exacting. Careful with numbers.', short:'exacting about numbers'},
+  {id:'unsure',t:'Not clear yet. I would need to see more.', short:'still unclear'},
+];
+const G2_R2 = [
+  {id:'ask',  t:'Ask one sharper question — you need something concrete to report.',
+   out:'You ask: “When can you send the verified figures?” You write the answer in your notebook, ready for the report your boss expects this afternoon. The meeting moves on — with a question mark still hanging over the rest of it.'},
+  {id:'defer',t:'Note it down. Don’t approve today. Ask them back with the numbers.',
+   out:'You nod. “Let’s pick this up next time, once the numbers are in.” You close your notebook. The proposal is not approved today — not because it is bad, but because you have nothing solid to take back. You leave thinking about how to explain the delay.'},
+  {id:'drop', t:'Let it go. Don’t push. Weigh the risk yourself later.',
+   out:'You say nothing more and let the presentation continue. In your head you run the risk again: if these numbers are wrong like last time, the person explaining it to your boss is you, not the person presenting. The meeting ends. You leave without showing what you were weighing.'},
+  {id:'trap', t:'“Don’t worry, I know you’re still junior. I’ll tell my boss the numbers look fine for now.”',
+   locked:true, why:'You don’t know enough about them to say this.',
+   sheet:'You were about to say it — then stopped. You met them for the first time today. You don’t know their role, or how long they have been doing it. And telling your boss the numbers look fine, with nothing in your hands, is not a risk you can carry alone — not after what your team went through last quarter. You go back and choose differently.'},
+];
+const G2_TRUTH = 'Burned by a vendor’s numbers last quarter. Protecting her own credibility with her boss.';
+
+function pitchScene(){
+  return S(340,190,`
+    <g transform="translate(206,34) scale(1.06)">${head(DIEM.art)}</g>
+    <g transform="translate(16,96) scale(.72)">
+      <path ${Kf('#9BBEE8')} d="M14 122c0-26 18-40 40-40s40 14 40 40z"/>
+      <ellipse ${Kf('#EFD3B8')} cx="54" cy="52" rx="25" ry="28"/>
+      <path ${Kf('#1E1E1E')} d="M27 52c0-20 12-31 27-31s27 11 27 31c-4-14-15-18-27-18s-23 4-27 18z"/>
+    </g>
+    <path ${Kf('#EADFC8')} d="M-10 152h360v44h-360z"/>
+    <rect ${Kt('#fff')} x="218" y="152" width="84" height="20" rx="4"/>
+    <text x="260" y="166" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="11" font-weight="700" fill="#121212">Diễm</text>
+    <rect ${Kt('#fff')} x="14" y="152" width="76" height="20" rx="4"/>
+    <text x="52" y="166" text-anchor="middle" font-family="Libre Franklin,sans-serif" font-size="11" font-weight="700" fill="#121212">You</text>
+  `,'#CFE3F2');
+}
+
+function renderG2Intro(){
+  document.getElementById('g2-art').innerHTML = S(120,104,artSwap);
+  const rounds = [
+    ['You','Answer under pressure, then read the person in front of you.'],
+    ['Her','Same meeting, her chair, her week.'],
+    ['Wrap-up','Keep your read, or change it.'],
+  ];
+  document.getElementById('g2-rounds').innerHTML = rounds.map((r,i)=>`
+    <div class="row"><div class="tile" style="background:var(--cream);font-family:var(--serif);font-size:24px;font-weight:900">${i+1}</div>
+    <div class="txt"><h4>${r[0]}</h4><p>${r[1]}</p></div></div>`).join('');
+}
+function startG2(){
+  ST.g2 = {r1:null, read:null, r2:null, trapTried:false, revise:null, timedOut:false};
+  renderG2R1(); go('g2-r1'); startTimer('g2-t1', 15, g2TimeUpR1);
+}
+function startTimer(id, secs, onEnd){
+  clearInterval(ST.timerId);
+  let left = secs;
+  const el = document.getElementById(id);
+  const paint = ()=>{ el.textContent = left>0 ? `${left}s` : 'Time up';
+    el.classList.toggle('low', left<=5 && left>0); el.classList.toggle('out', left<=0); };
+  paint();
+  ST.timerId = setInterval(()=>{
+    left--; paint();
+    if(left<=0){ clearInterval(ST.timerId); onEnd(); }
+  },1000);
+}
+function g2TimeUpR1(){
+  if(ST.g2.r1) return;
+  ST.g2.r1 = 'freeze'; ST.g2.timedOut = true;
+  renderG2R1();
+  document.getElementById('g2-r1-late').innerHTML =
+    `<div class="note" style="background:#FBD9D6">The moment passed while you were thinking. Saying nothing is an answer too.</div>`;
+}
+function renderG2R1(){
+  document.getElementById('g2-scene').innerHTML = pitchScene();
+  document.getElementById('g2-r1-opts').innerHTML = G2_R1.map(o=>`
+    <div class="opt ${ST.g2.r1===o.id?'sel':''}" onclick="pickG2R1('${o.id}')" style="align-items:flex-start">
+      <span class="rd" style="margin-top:2px"></span><span>${o.t}</span></div>`).join('');
+  document.getElementById('g2-r1-next').disabled = !ST.g2.r1;
+}
+function pickG2R1(id){
+  if(ST.g2.timedOut) return;
+  ST.g2.r1 = id; clearInterval(ST.timerId);
+  document.getElementById('g2-t1').textContent = 'Answered';
+  document.getElementById('g2-t1').classList.remove('low');
+  renderG2R1();
+}
+function renderG2Read(){
+  document.getElementById('g2-read-opts').innerHTML = G2_READ.map(o=>`
+    <div class="opt ${ST.g2.read===o.id?'sel':''}" onclick="pickG2Read('${o.id}')" style="align-items:flex-start">
+      <span class="rd" style="margin-top:2px"></span><span>${o.t}</span></div>`).join('');
+  document.getElementById('g2-read-next').disabled = !ST.g2.read;
+}
+function pickG2Read(id){ ST.g2.read=id; renderG2Read(); }
+function toBeat(){
+  go('g2-beat');
+  const btn = document.getElementById('beat-btn');
+  btn.style.opacity = '0';
+  setTimeout(()=>{ if(document.getElementById('g2-beat').classList.contains('on')) btn.style.opacity='1'; }, 2400);
+}
+function renderG2R2(){
+  document.getElementById('g2-said').textContent = G2_R1.find(o=>o.id===ST.g2.r1).t;
+  document.getElementById('g2-r2-opts').innerHTML = G2_R2.map(o=>{
+    const dead = o.locked && ST.g2.trapTried;
+    return `<div class="opt ${ST.g2.r2===o.id?'sel':''} ${dead?'locked':''}"
+      ${dead?'':`onclick="pickG2R2('${o.id}')"`} style="align-items:flex-start">
+      <span class="rd" style="margin-top:2px"></span>
+      <span>${o.t}${dead?`<span class="lockwhy">🔒 ${o.why}</span>`:''}</span></div>`;
+  }).join('');
+  const btn = document.getElementById('g2-r2-next');
+  btn.disabled = !ST.g2.r2;
+  btn.textContent = ST.g2.trapTried && !ST.g2.r2 ? 'Choose again' : 'Continue';
+}
+function pickG2R2(id){
+  const o = G2_R2.find(x=>x.id===id);
+  if(o.locked){
+    ST.g2.trapTried = true; clearInterval(ST.timerId);
+    const chip = document.getElementById('g2-t2');
+    chip.textContent = '—'; chip.classList.remove('low','out');
+    document.getElementById('trap-text').textContent = o.sheet;
+    document.getElementById('trap-sheet').classList.add('up');
+    document.getElementById('trap-scrim').classList.add('on');
+    return renderG2R2();
+  }
+  ST.g2.r2 = id; clearInterval(ST.timerId);
+  document.getElementById('g2-t2').textContent = 'Answered';
+  document.getElementById('g2-t2').classList.remove('low');
+  renderG2R2();
+}
+function closeTrap(){
+  document.getElementById('trap-sheet').classList.remove('up');
+  document.getElementById('trap-scrim').classList.remove('on');
+}
+function g2TimeUpR2(){
+  if(ST.g2.r2) return;
+  ST.g2.r2 = 'drop';
+  renderG2R2();
+}
+function renderG2Outcome(){
+  document.getElementById('g2-outcome-text').textContent = G2_R2.find(o=>o.id===ST.g2.r2).out;
+}
+function renderG2Reflect(){
+  const read = G2_READ.find(o=>o.id===ST.g2.read);
+  const first = read.t;
+  document.getElementById('g2-vs').innerHTML = `
+    <div class="col"><b>Your first read</b><p>${first}</p></div>
+    <div class="arrow">→</div>
+    <div class="col after"><b>What was going on</b><p>${G2_TRUTH}</p></div>`;
+  const opts = [
+    {id:'keep',   t:`No — I still read her as ${read.short}.`},
+    {id:'change', t:'Yes — she was worried, and careful about the work.'},
+    {id:'more',   t:'Not sure — I would need more.'},
+  ];
+  document.getElementById('g2-revise-opts').innerHTML = opts.map(o=>`
+    <div class="opt ${ST.g2.revise===o.id?'sel':''}" onclick="pickG2Revise('${o.id}')" style="align-items:flex-start">
+      <span class="rd" style="margin-top:2px"></span><span>${o.t}</span></div>`).join('');
+  document.getElementById('g2-changed').innerHTML = ST.g2.revise==='change' ? `
+    <div class="card" style="background:var(--purple);margin-top:14px"><div class="body">
+      <b style="font-size:10px;letter-spacing:.1em;text-transform:uppercase">You changed your read</b>
+      <div class="vs" style="margin-bottom:0">
+        <div class="col" style="background:#fff"><b>Before</b><p>${first}</p></div>
+        <div class="arrow">→</div>
+        <div class="col" style="background:#fff"><b>After</b><p>Worried, and careful about the work.</p></div>
+      </div></div></div>` : '';
+  document.getElementById('g2-end').disabled = !ST.g2.revise;
+}
+function pickG2Revise(id){ ST.g2.revise=id; renderG2Reflect(); }
+function endG2(){
+  ST.bonus = 0;
+  ST.gameDone[1] = true; ST.gamePts[1] = 500; ST.points += 500;
+  ST.skills.perspective = Math.min(97, ST.skills.perspective + 5);
+  ST.skills.listen = Math.min(97, ST.skills.listen + 3);
+  showPoints(500, 'Same Situation');
+  document.getElementById('pt-p').innerHTML =
+    'Same Situation · no score for this one.<br>' + ST.gameDone.filter(Boolean).length + ' of 3 done today.';
+}
+
+/* ==================================================================
    BOOT
    ================================================================== */
 document.querySelectorAll('.statusbar span:last-child').forEach(s=>s.innerHTML=statusIcons);
 document.getElementById('splash-art').innerHTML = S(120,100,artEye);
-renderSurvey(); renderIntro(); renderTabs('s-home'); renderHome();
+renderSurvey(); renderIntro(); renderG2Intro(); renderTabs('s-home'); renderHome();
 document.getElementById('jump').innerHTML = [
   ['Splash','s-splash'],['Survey','s-survey'],['Plan','s-plan'],['Home','s-home'],
   ['Library','s-library'],['Discover','s-discover'],['Profile','s-profile'],['Practice','s-practice'],

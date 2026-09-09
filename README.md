@@ -11,7 +11,7 @@ việc: *tiếp nhận thông tin có chọn lọc* và *suy luận có căn c�
 
 | File | Nội dung | Trạng thái |
 |---|---|---|
-| `index.html` | **App Orran** — onboarding, Home 4 tab, Daily Practice, Game 1 | ✅ chơi được |
+| `index.html` | **App Orran** — onboarding, Home 4 tab, Daily Practice, Game 1 + Game 2 | ✅ chơi được |
 | `read-the-room.html` | **Game 3 · Guess the Person** (chạy độc lập) | ✅ chơi được, chưa gắn vào hub |
 
 ---
@@ -40,10 +40,23 @@ Play → Point earned → Progress x/3. Xong 3/3 → Point summary → Congrats 
 - **Result** — điểm /100, rank, bản đồ quyền lực thật, bài học, điểm thưởng nếu tìm ra
   stakeholder ẩn.
 
-Game 2 và Game 3 hiện là **stub** trong flow: bấm “Simulate finish (demo)” để xem trọn vòng lặp
-ngày. Game 3 đã dựng xong nhưng **chưa đẩy lên hub** theo yêu cầu.
+**Game 2 · Same Situation** (đầy đủ) — cơ chế lõi *self perspective → switch perspective*:
+- **Round 1 · You** — bạn đang pitch, Diễm ngắt lời hỏi về số liệu bạn chưa chuẩn bị. Đồng hồ
+  15 giây; hết giờ thì lựa chọn “khựng lại” được chọn thay bạn. Sau đó bạn đánh giá Diễm là
+  người thế nào.
+- **Khoảng lặng 2 giây** — “Diễm gật đầu, không nói gì thêm, rời phòng họp.”
+- **Round 2 · Her** — bạn *là* Diễm, biết tuần trước sếp vừa mắng vì vendor đưa số liệu sai.
+  Câu bạn chọn ở round 1 được dùng **nguyên văn** làm dữ kiện. Có 1 **lựa chọn bẫy** (“chị hiểu
+  bạn còn junior…”) — bấm vào sẽ bị chặn lại vì Diễm chưa đủ thông tin để nói câu đó, rồi khoá lại.
+- **Wrap-up** — so đánh giá ban đầu với bối cảnh thật, cho phép sửa lại đánh giá.
 
-### Thang điểm (khớp bảng 100 điểm)
+**Game 2 không chấm điểm** — đúng chủ đích trong Figma: không phản hồi đúng/sai, không kết luận
+đạo đức, để người chơi tự ngẫm. Vẫn cộng điểm tích luỹ cho vòng lặp ngày, nhưng nói rõ “no score”.
+
+**Game 3** đã dựng xong nhưng **chưa đẩy lên hub** theo yêu cầu — trong flow vẫn là stub, bấm
+“Simulate finish (demo)” để xem trọn vòng lặp ngày.
+
+### Thang điểm Game 1 (khớp bảng 100 điểm)
 
 | Hành động | Điểm |
 |---|---|
@@ -88,6 +101,7 @@ Mỗi file tự chứa HTML + CSS + JS + minh hoạ SVG. Search theo mốc:
 | Clip + email ở round 3 | `const TWIST` |
 | Công thức chấm điểm | `function scoreG1` |
 | Rank và mô tả | `const RANKS` |
+| Kịch bản Game 2: thoại, lựa chọn, option bẫy, đoạn kể sau mỗi lựa chọn | `const G2_R1` · `G2_READ` · `G2_R2` |
 | Nội dung tab Library / Discover / Profile | `renderLibrary` · `renderDiscover` · `renderProfile` |
 | Mặt người (tóc, kính, màu da) | `function head` |
 | Cảnh phòng họp | `function meetingScene` |
